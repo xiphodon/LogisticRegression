@@ -91,6 +91,24 @@ def plotBestFit(weights):
     plt.show()
 
 
+def stocGradAscent0(dataMatrix, classLabels):
+    '''
+    随机梯度上升算法
+    :param dataMatrix: 数据集
+    :param classLabels: 标签集
+    :return: 权重系数向量
+    '''
+    # 全为数组间运算（对应相乘）
+    m,n = np.shape(dataMatrix)
+    alpha = 0.01
+    weights = np.ones(n) # n列的行向量（数组）
+    for i in range(m):
+        h = sigmoid(sum(dataMatrix[i]*weights)) # 数组间元素对应相乘，获得结果为数值
+        error = classLabels[i] - h
+        weights = weights + alpha * error * dataMatrix[i]
+    return weights
+
+
 def step01():
     '''
     获取权重系数列向量
@@ -107,9 +125,20 @@ def step02():
     '''
     dataArr, labelMat = loadDataSet()
     weights = gradAscent(dataArr, labelMat)
+    # weights.getA() 矩阵转数组
     plotBestFit(weights.getA())
 
 
+def step03():
+    '''
+    使用随机梯度上升算法优化
+    :return:
+    '''
+    dataArr, labelMat = loadDataSet()
+    weights = stocGradAscent0(np.array(dataArr), labelMat)
+    plotBestFit(weights)
+
 if __name__ == '__main__':
     # step01()
-    step02()
+    # step02()
+    step03()
