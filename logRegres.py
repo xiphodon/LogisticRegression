@@ -37,7 +37,7 @@ def gradAscent(dataMatIn, classLabels):
     梯度上升算法（同梯度下降算法，获得使代价函数最小的权重系数列向量），获取权重系数列向量
     :param dataMatIn: 数据集列表
     :param classLabels: 标签集列表
-    :return: 权重系数列向量
+    :return: 权重系数列向量（回归系数）
     '''
     dataMatrix = np.mat(dataMatIn) # 100*3 数据集矩阵
     labelMat = np.mat(classLabels).transpose() # 100*1 标签列向量
@@ -96,7 +96,7 @@ def stocGradAscent0(dataMatrix, classLabels):
     随机梯度上升算法
     :param dataMatrix: 数据集
     :param classLabels: 标签集
-    :return: 权重系数向量
+    :return: 权重系数向量（回归系数）
     '''
     # 全为数组间运算（对应相乘）
     m,n = np.shape(dataMatrix)
@@ -106,6 +106,28 @@ def stocGradAscent0(dataMatrix, classLabels):
         h = sigmoid(sum(dataMatrix[i]*weights)) # 数组间元素对应相乘，获得结果为数值
         error = classLabels[i] - h
         weights = weights + alpha * error * dataMatrix[i]
+    return weights
+
+
+def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    '''
+    改进的随机梯度上升算法
+    :param dataMatrix: 数据集
+    :param classLabels: 标签集
+    :param numIter: 迭代次数
+    :return: 回归系数
+    '''
+    m,n = np.shape(dataMatrix)
+    weights = np.ones(n)
+    for j in range(numIter):
+        dataIndex = list(range(m))
+        for i in range(m):
+            alpha = 4/(1.0+j+i)+0.0001 # 学习率渐渐变小，趋于收敛，避免严格下降，使代价函数收敛更快，避免高频波动
+            randIndex = int(np.random.uniform(0,len(dataIndex))) # 随机选取数据，减小代价函数周期性波动
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))
+            error = classLabels[randIndex] - h
+            weights = weights + alpha * error * dataMatrix[randIndex]
+            del(dataIndex[randIndex]) #选择完剔除该数据索引
     return weights
 
 
@@ -138,7 +160,18 @@ def step03():
     weights = stocGradAscent0(np.array(dataArr), labelMat)
     plotBestFit(weights)
 
+def step04():
+    '''
+    使用改进的随机梯度上升算法
+    :return:
+    '''
+    dataArr, labelMat = loadDataSet()
+    weights = stocGradAscent1(np.array(dataArr), labelMat, 200)
+    plotBestFit(weights)
+
+
 if __name__ == '__main__':
     # step01()
     # step02()
-    step03()
+    # step03()
+    step04()
