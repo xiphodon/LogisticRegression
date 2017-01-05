@@ -14,7 +14,7 @@ import numpy as np
 def loadDataSet():
     '''
     加载数据集
-    :return: 数据集，标签集
+    :return: 数据集列表，标签集列表
     '''
     dataMat = []; labelMat = []
     fr = open('data/testSet.txt')
@@ -56,14 +56,60 @@ def gradAscent(dataMatIn, classLabels):
     return weights
 
 
+def plotBestFit(weights):
+    '''
+    画出数据集和Logistic回归最佳拟合直线函数
+    :param weights:
+    :return:
+    '''
+    import matplotlib.pyplot as plt
+    dataMat,labelMat=loadDataSet()
+    dataArr = np.array(dataMat)
+    n = np.shape(dataArr)[0] # 数据集数组行数
+
+    # 数据集按类别分类
+    xcord1 = []; ycord1 = []
+    xcord2 = []; ycord2 = []
+    for i in range(n):
+        if int(labelMat[i])== 1:
+            xcord1.append(dataArr[i,1]); ycord1.append(dataArr[i,2])
+        else:
+            xcord2.append(dataArr[i,1]); ycord2.append(dataArr[i,2])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    # 数据值为1的用红色方块标记
+    ax.scatter(xcord1, ycord1, s=30, c='red', marker='s')
+    # 数据值为0的用绿色圆点标记
+    ax.scatter(xcord2, ycord2, s=30, c='green')
+    # 生成从-3到+3步长为0.1的数组
+    x = np.arange(-3.0, 3.0, 0.1)
+    # 按照阶跃函数等于0.5时划分分类，此时阶跃函数自变量即回归直线为0，即w0x0+w1x1+w2x2=0，解x2为：
+    y = (-weights[0]-weights[1]*x)/weights[2]
+    # 纵标y即为特征值x2（x0==1）
+    ax.plot(x, y)
+    plt.xlabel('X1'); plt.ylabel('X2');
+    plt.show()
+
+
 def step01():
     '''
     获取权重系数列向量
     :return:
     '''
     dataArr, labelMat = loadDataSet()
-    print(gradAscent(dataArr, labelMat))
+    weights = gradAscent(dataArr, labelMat)
+    print(weights)
+
+def step02():
+    '''
+    画出决策边界
+    :return:
+    '''
+    dataArr, labelMat = loadDataSet()
+    weights = gradAscent(dataArr, labelMat)
+    plotBestFit(weights.getA())
 
 
 if __name__ == '__main__':
-    step01()
+    # step01()
+    step02()
