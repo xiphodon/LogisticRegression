@@ -124,11 +124,72 @@ def stocGradAscent1(dataMatrix, classLabels, numIter=150):
         for i in range(m):
             alpha = 4/(1.0+j+i)+0.0001 # 学习率渐渐变小，趋于收敛，避免严格下降，使代价函数收敛更快，避免高频波动
             randIndex = int(np.random.uniform(0,len(dataIndex))) # 随机选取数据，减小代价函数周期性波动
-            h = sigmoid(sum(dataMatrix[randIndex]*weights))
+            h = sigmoid(np.sum(dataMatrix[randIndex]*weights))
             error = classLabels[randIndex] - h
             weights = weights + alpha * error * dataMatrix[randIndex]
             del(dataIndex[randIndex]) #选择完剔除该数据索引
     return weights
+
+
+def classifyVector(inX, weights):
+    '''
+    分类器
+    :param inX: 测试数据（一条）
+    :param weights: 回归系数
+    :return:
+    '''
+    prob = sigmoid(np.sum(inX * weights))
+    if prob > 0.5:
+        return 1.0
+    else:
+        return 0.0
+
+
+def colicTest():
+    '''
+    从疝气病症预测病马的死亡率——分类错误率
+    通过训练集训练后分类测试集的错误率
+    :return: 错误率
+    '''
+    frTrain = open('data/horseColicTraining.txt');
+    frTest = open('data/horseColicTest.txt')
+    trainingSet = [];
+    trainingLabels = []
+    for line in frTrain.readlines():
+        currLine = line.strip().split('\t')
+        lineArr = []
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        trainingSet.append(lineArr)
+        trainingLabels.append(float(currLine[21]))
+    # 训练的逻辑回归系数
+    trainWeights = stocGradAscent1(np.array(trainingSet), trainingLabels, 1000)
+    errorCount = 0
+    numTestVec = 0.0
+    for line in frTest.readlines():
+        numTestVec += 1.0
+        currLine = line.strip().split('\t')
+        lineArr = []
+        for i in range(21):
+            lineArr.append(float(currLine[i]))
+        if int(classifyVector(np.array(lineArr), trainWeights)) != int(currLine[21]):
+            # 若分类器分类错误，错误数+1
+            errorCount += 1
+    errorRate = (float(errorCount) / numTestVec)
+    print("the error rate of this test is: %f" % errorRate)
+    return errorRate
+
+
+def multiTest():
+    '''
+    调用colicTest()方法多次后求错误率平均值
+    :return: 平均错误率
+    '''
+    numTests = 10
+    errorSum = 0.0
+    for k in range(numTests):
+        errorSum += colicTest()
+    print("after %d iterations the average error rate is: %f" % (numTests, errorSum / float(numTests)))
 
 
 def step01():
@@ -174,4 +235,6 @@ if __name__ == '__main__':
     # step01()
     # step02()
     # step03()
-    step04()
+    # step04()
+    colicTest()
+    multiTest()
